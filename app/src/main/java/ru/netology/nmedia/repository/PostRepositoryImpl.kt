@@ -101,26 +101,52 @@ class PostRepositoryImpl : PostRepository {
 
     }
 
-    override fun save(post: Post) {
+    override fun save(post: Post, callback: PostRepository.AsyncCallback<Post>) {
         val request: Request = Request.Builder()
             .post(gson.toJson(post).toRequestBody(jsonType))
             .url("${BASE_URL}/api/slow/posts")
             .build()
 
         client.newCall(request)
-            .execute()
-            .close()
+            .enqueue(object : Callback{
+                override fun onResponse(call: Call, response: Response) {
+                    val body = response.body?.string() ?: throw RuntimeException("Null body")
+                    try {
+                        callback.onSuccess(gson.fromJson(body, typeTokenPost.type))
+                    } catch (e: Exception) {
+                        callback.onError(e)
+                    }
+                }
+                override fun onFailure(call: Call, e: IOException) {
+                    callback.onError(e)
+                }
+            })
     }
 
-    override fun removeById(id: Long) {
+    override fun removeById(id: Long, callback: PostRepository.AsyncCallback<Unit>) {
         val request: Request = Request.Builder()
             .delete()
             .url("${BASE_URL}/api/slow/posts/$id")
             .build()
 
         client.newCall(request)
-            .execute()
-            .close()
+            .enqueue(object  : Callback{
+                override fun onResponse(call: Call, response: Response) {
+                    response.body?.string() ?: throw RuntimeException("Null body")
+                    try {
+                        callback.onSuccess(Unit)
+                    } catch (e: Exception) {
+                        callback.onError(e)
+                    }
+
+                }
+
+                override fun onFailure(call: Call, e: IOException) {
+                    callback.onError(e)
+                }
+
+            })
+
     }
 
     override fun getAllAsync(callback: PostRepository.AsyncCallback<List<Post>>) {
