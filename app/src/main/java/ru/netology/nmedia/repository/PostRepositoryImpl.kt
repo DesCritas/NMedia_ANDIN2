@@ -24,19 +24,19 @@ class PostRepositoryImpl : PostRepository {
         private val jsonType = "application/json".toMediaType()
     }
 
-    override fun getAll(): List<Post> {
-        val request: Request = Request.Builder()
-            .url("${BASE_URL}/api/slow/posts")
-            .build()
-
-        val response = client.newCall(request)
-            .execute()
-            .let { it.body?.string() ?: throw RuntimeException("body is null") }
-
-        return response.let {
-            gson.fromJson(it, typeToken.type)
-        }
-    }
+    //override fun getAll(): List<Post> {
+    //    val request: Request = Request.Builder()
+    //        .url("${BASE_URL}/api/slow/posts")
+    //        .build()
+//
+    //    val response = client.newCall(request)
+    //        .execute()
+    //        .let { it.body?.string() ?: throw RuntimeException("body is null") }
+//
+    //    return response.let {
+    //        gson.fromJson(it, typeToken.type)
+    //    }
+    //}
 
     //fun getById(id: Long): Post {
     //    val request: Request = Request.Builder()

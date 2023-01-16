@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +9,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
+import ru.netology.nmedia.repository.PostRepositoryImplRetrofit
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.IOException
 
@@ -23,7 +25,7 @@ private val empty = Post(
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
     // упрощённый вариант
-    private val repository: PostRepository = PostRepositoryImpl()
+    private val repository: PostRepository = PostRepositoryImplRetrofit()
     private val _data = MutableLiveData(FeedModel())
     val data: LiveData<FeedModel>
         get() = _data
@@ -63,6 +65,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
                 override fun onError(e: Exception) {
                     _data.postValue(FeedModel(error = true))
+                    Toast.makeText(getApplication(), "Ошибка доступа, попробуйте еще раз", Toast.LENGTH_LONG).show()
                 }
 
             })
