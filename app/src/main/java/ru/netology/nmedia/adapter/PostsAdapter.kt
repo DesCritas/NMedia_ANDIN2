@@ -6,9 +6,11 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.view.loadCircleCrop
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -39,9 +41,9 @@ class PostViewHolder(
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
+            avatar.loadCircleCrop("http://10.0.2.2:9999/avatars/${post.authorAvatar}")
             published.text = post.published
             content.text = post.content
-            // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
