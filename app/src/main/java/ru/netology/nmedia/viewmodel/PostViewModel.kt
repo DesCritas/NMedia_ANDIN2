@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryImpl
+import ru.netology.nmedia.repository.PostRepositoryImplRetrofit
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.IOException
 
@@ -23,7 +23,7 @@ private val empty = Post(
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
     // упрощённый вариант
-    private val repository: PostRepository = PostRepositoryImpl()
+    private val repository: PostRepository = PostRepositoryImplRetrofit()
     private val _data = MutableLiveData(FeedModel())
     val data: LiveData<FeedModel>
         get() = _data
@@ -31,6 +31,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
+    private val _errorOnCreation = SingleLiveEvent<Unit>()
+    val errorOnCreation: LiveData<Unit>
+        get() = _errorOnCreation
+
+
+
 
     init {
         loadPosts()
@@ -62,7 +68,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 override fun onError(e: Exception) {
-                    _data.postValue(FeedModel(error = true))
+                    _errorOnCreation.postValue(Unit)
+                    //_data.postValue(FeedModel(error = true))
+                    //Toast.makeText(getApplication(), "Ошибка доступа, попробуйте еще раз", Toast.LENGTH_LONG).show()
                 }
 
             })
@@ -106,8 +114,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         val old = _data.value?.posts.orEmpty()
 
         try {
-            repository.removeById(id, object : PostRepository.AsyncCallback<Unit>{
-                override fun onSuccess(posts : Unit) {
+            repository.removeById(id, object : PostRepository.AsyncCallback<Unit> {
+                override fun onSuccess(posts: Unit) {
                     _data.postValue(
                         _data.value?.copy(posts = _data.value?.posts.orEmpty()
                             .filter { it.id != id }
