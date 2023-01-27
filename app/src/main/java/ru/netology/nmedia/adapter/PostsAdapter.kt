@@ -41,7 +41,7 @@ class PostViewHolder(
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
-            avatar.loadCircleCrop("http://10.0.2.2:9999/avatars/${post.authorAvatar}")
+            avatar.loadCircleCrop("${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}")
             published.text = post.published
             content.text = post.content
             like.isChecked = post.likedByMe
