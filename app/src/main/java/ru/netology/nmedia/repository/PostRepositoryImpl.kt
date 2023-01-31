@@ -1,3 +1,4 @@
+/*
 package ru.netology.nmedia.repository
 
 import com.google.gson.Gson
@@ -174,3 +175,4 @@ class PostRepositoryImpl : PostRepository {
             })
     }
 }
+*/
