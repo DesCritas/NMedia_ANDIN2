@@ -41,7 +41,7 @@ class NewPostFragment : Fragment() {
             AndroidUtils.hideKeyboard(requireView())
         }
         viewModel.errorOnCreation.observe(viewLifecycleOwner){
-            Toast.makeText(context, "Ошибка доступа, попробуйте еще раз", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Ошибка доступа, попробуйте еще раз", Toast.LENGTH_SHORT).show()
         }
         viewModel.postCreated.observe(viewLifecycleOwner) {
             viewModel.loadPosts()
