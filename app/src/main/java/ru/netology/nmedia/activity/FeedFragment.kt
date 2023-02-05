@@ -84,6 +84,10 @@ class FeedFragment : Fragment() {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
+        viewModel.newerCount.observe(viewLifecycleOwner){
+            println("Newer count: $it")
+        }
+
         return binding.root
     }
 }

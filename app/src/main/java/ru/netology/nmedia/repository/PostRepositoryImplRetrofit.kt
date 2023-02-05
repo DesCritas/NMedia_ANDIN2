@@ -1,6 +1,15 @@
 package ru.netology.nmedia.repository
 
+import android.app.PendingIntent.CanceledException
 import androidx.lifecycle.map
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import okhttp3.Dispatcher
 import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Post
@@ -14,7 +23,27 @@ import java.io.IOException
 
 
 class PostRepositoryImplRetrofit(private val postDao: PostDao) : PostRepository {
-    override val data = postDao.getAll().map(List<PostEntity>::toDto)
+    override val data = postDao.getAll().map(List<PostEntity>::toDto).flowOn(Dispatchers.Default)
+    override fun getNewerCount(firstId: Long): Flow<Int> = flow {
+        while (true){
+            try {
+                val response = PostsApi.retrofitService.getNewer(firstId)
+                if (!response.isSuccessful) {
+                    throw ApiError(response.code(), response.message())
+                }
+                val body = response.body() ?: throw ApiError(response.code(), response.message())
+                postDao.insert(body.toEntity())
+                emit(body.size)
+                delay(10_000L)
+            } catch (e: CancellationException){
+                throw e
+            } catch (e: IOException) {
+                throw NetworkError
+            } catch (e: Exception) {
+                throw UnknownError
+            }
+        }
+    }
 
     /*override val data: LiveData<List<Post>> = postDao.getAll().map { it ->
         it.map(PostEntity::toDto)

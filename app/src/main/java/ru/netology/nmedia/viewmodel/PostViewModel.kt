@@ -2,6 +2,8 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
@@ -27,10 +29,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         AppDb.getInstance(context = application).postDao()
     )
 
-    val data: LiveData<FeedModel> = repository.data.map { FeedModel(it) }
+    val data: LiveData<FeedModel> = repository.data.map(::FeedModel).asLiveData(Dispatchers.Default)
     private val _state = MutableLiveData<FeedModelState>(FeedModelState.Idle)
     val state: LiveData<FeedModelState>
         get() = _state
+    val newerCount: LiveData<Int> = data.switchMap {
+        repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+            .asLiveData(Dispatchers.Default)
+    }
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
@@ -150,27 +156,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
             }
-
-        // Оптимистичная модель
-        /*val old = _data.value?.posts.orEmpty()
-
-        try {
-            {
-                override fun onSuccess(posts: Unit) {
-                    _data.postValue(
-                        _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                            .filter { it.id != id }
-                        )
-                    )
-                }
-
-                override fun onError(e: Exception) {
-                    _data.postValue(FeedModel(error = true))
-                }
-            })
-        } catch (e: IOException) {
-            _data.postValue(_data.value?.copy(posts = old))
-        }*/
 
     }
 
