@@ -5,12 +5,18 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE visible = 1 ORDER BY id DESC")
+    fun getVisible(): Flow<List<PostEntity>>
+
+    @Query("UPDATE PostEntity SET visible = 1 WHERE visible = 0")
+    suspend fun getNewerUpdate(): Int? = getAll().firstOrNull()?.size
 
     @Insert(onConflict = REPLACE)
     suspend fun insert(post: PostEntity)

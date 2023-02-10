@@ -10,4 +10,6 @@ interface PostRepository {
     suspend fun save(post: Post)
     suspend fun removeById(id: Long )
     suspend fun getAllAsync()
+
+    suspend fun newerUpdate() : Flow<Int>
 }

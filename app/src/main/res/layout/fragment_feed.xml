@@ -7,7 +7,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@+id/retryTitle"
+        app:layout_constraintStart_toStartOf="@+id/retryTitle">
 
         <TextView
             android:id="@+id/retryTitle"
@@ -71,12 +73,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="5"
                 tools:listitem="@layout/card_post" />
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/show_new_posts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/new_posts"
+        android:layout_margin="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        android:layout_gravity="center|top"
+        android:contentDescription="@string/tap_to_go_to_new_posts"
+
+        />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

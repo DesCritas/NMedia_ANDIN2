@@ -72,9 +72,9 @@ class FeedFragment : Fragment() {
         }
 
         //Этот блок не нужен?
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
-        }
+        //binding.retryButton.setOnClickListener {
+        //    viewModel.loadPosts()
+        //}
 
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.refresh()
@@ -84,8 +84,13 @@ class FeedFragment : Fragment() {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner){
+        viewModel.newerCount.observe(viewLifecycleOwner) {
             println("Newer count: $it")
+            binding.showNewPosts.isVisible = it != 0
+        }
+        binding.showNewPosts.setOnClickListener{
+            viewModel.getNewerUpdate()
+            it.isVisible = false
         }
 
         return binding.root

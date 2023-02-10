@@ -42,6 +42,7 @@ android {
 
         }
     }
+    namespace 'ru.netology.nmedia'
 }
 
 dependencies {

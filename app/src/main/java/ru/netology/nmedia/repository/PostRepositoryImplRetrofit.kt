@@ -1,15 +1,9 @@
 package ru.netology.nmedia.repository
 
-import android.app.PendingIntent.CanceledException
-import androidx.lifecycle.map
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import okhttp3.Dispatcher
+import kotlinx.coroutines.flow.*
 import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Post
@@ -23,16 +17,27 @@ import java.io.IOException
 
 
 class PostRepositoryImplRetrofit(private val postDao: PostDao) : PostRepository {
-    override val data = postDao.getAll().map(List<PostEntity>::toDto).flowOn(Dispatchers.Default)
+    override val data = postDao.getVisible().map(List<PostEntity>::toDto).flowOn(Dispatchers.Default)
     override fun getNewerCount(firstId: Long): Flow<Int> = flow {
         while (true){
             try {
-                val response = PostsApi.retrofitService.getNewer(firstId)
+                //val currentCount = maxOf(firstId,postDao.getAll().first().size.toLong())
+                val response = PostsApi.retrofitService.getNewer(
+                    firstId
+                    //currentCount
+                )
                 if (!response.isSuccessful) {
                     throw ApiError(response.code(), response.message())
                 }
                 val body = response.body() ?: throw ApiError(response.code(), response.message())
-                postDao.insert(body.toEntity())
+                postDao.insert(body.toEntity().map{
+                    val currentCout = postDao.getAll().first().toDto().first().id
+                    if (currentCout<firstId){
+                        it.copy(visible = false)
+                    } else
+                        it
+
+                })
                 emit(body.size)
                 delay(10_000L)
             } catch (e: CancellationException){
@@ -45,8 +50,20 @@ class PostRepositoryImplRetrofit(private val postDao: PostDao) : PostRepository 
         }
     }
 
-    /*override val data: LiveData<List<Post>> = postDao.getAll().map { it ->
-        it.map(PostEntity::toDto)
+    override suspend fun newerUpdate(): Flow<Int> = flow{
+        val count: Int? = postDao.getNewerUpdate()
+        postDao.getAll().map { list ->
+            list.map {
+                it.copy(visible = true)
+            }
+        }
+
+    }
+
+
+            /*List<Post> {
+        val flowList: Flow<List<Post>> = postDao.getAll().map { it.toDto() }
+        return flowList.flatMapConcat { it.asFlow() }.toList()
     }*/
 
 
@@ -77,18 +94,6 @@ class PostRepositoryImplRetrofit(private val postDao: PostDao) : PostRepository 
                 } catch (e: Exception) {
                     throw UnknownError
                 }
-                /*override fun onResponse(call: Call<Post>, response: Response<Post>) {
-                    if (!response.isSuccessful) {
-                        callback.onError(RuntimeException(response.message()))
-                        return
-                    }
-
-                    callback.onSuccess(response.body() ?: throw RuntimeException("body is null"))
-                }
-
-                override fun onFailure(call: Call<Post>, t: Throwable) {
-                    callback.onError(t as Exception)
-                }*/
 
 
             } else {
@@ -100,19 +105,6 @@ class PostRepositoryImplRetrofit(private val postDao: PostDao) : PostRepository 
                 } catch (e: Exception) {
                     throw UnknownError
                 }
-
-                /*override fun onResponse(call: Call<Post>, response: Response<Post>) {
-                    if (!response.isSuccessful) {
-                        callback.onError(RuntimeException(response.message()))
-                        return
-                    }
-
-                    callback.onSuccess(response.body() ?: throw RuntimeException("body is null"))
-                }
-
-                override fun onFailure(call: Call<Post>, t: Throwable) {
-                    callback.onError(t as Exception)
-                }*/
 
             }
         }
@@ -131,20 +123,6 @@ class PostRepositoryImplRetrofit(private val postDao: PostDao) : PostRepository 
             } catch (e: Exception) {
                 throw UnknownError
             }
-            /*override fun onResponse(call: Call<Post>, response: Response<Post>) {
-                if (!response.isSuccessful) {
-                    callback.onError(RuntimeException(response.message()))
-                    return
-                }
-
-                callback.onSuccess(response.body() ?: throw RuntimeException("body is null"))
-            }
-
-            override fun onFailure(call: Call<Post>, t: Throwable) {
-                callback.onError(t as Exception)
-
-
-            }*/
 
         }
 
@@ -158,18 +136,6 @@ class PostRepositoryImplRetrofit(private val postDao: PostDao) : PostRepository 
             } catch (e: Exception) {
                 throw UnknownError
             }
-            /*override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
-                if (!response.isSuccessful) {
-                    callback.onError(RuntimeException(response.message()))
-                    return
-                }
-
-                callback.onSuccess(response.body() ?: throw RuntimeException("body is null"))
-            }
-
-            override fun onFailure(call: Call<Unit>, t: Throwable) {
-                callback.onError(t as Exception)
-            }*/
 
         }
     }

@@ -37,6 +37,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
             .asLiveData(Dispatchers.Default)
     }
+    private val _newerUpdate = SingleLiveEvent<Unit>()
+    val newerUpdate: LiveData<Unit>
+        get() = _newerUpdate
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
@@ -76,6 +79,17 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     _state.value = FeedModelState.Error
                 }
             }
+
+    }
+
+    fun getNewerUpdate() {
+
+
+
+
+
+
+
 
     }
 
@@ -120,19 +134,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     _state.value = FeedModelState.Error
                 }
             }
-
-
-        /*override fun onSuccess(posts: Post) {
-            _data.postValue(_data.value?.posts?.map {
-                if (it.id == posts.id) posts else it
-            }?.let {
-                _data.value?.copy(posts = it)
-            })
-        }
-
-        override fun onError(e: Exception) {
-            _data.postValue(FeedModel(error = true))
-        }*/
     }
 
 
